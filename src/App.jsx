@@ -1,8 +1,37 @@
 
 import { useState, useEffect } from 'react'
+import { AuthProvider, useAuth } from './AuthContext'
+import LoginForm from './LoginForm'
+import RegisterForm from './RegisterForm'
+import Header from './Header'
+import UserManagement from './UserManagement'
 import './App.css'
 
-export default function App() {
+function MainApp() {
+  const { user } = useAuth()
+  const [showRegister, setShowRegister] = useState(false)
+  const [showUserManagement, setShowUserManagement] = useState(false)
+
+  if (!user) {
+    return showRegister ? (
+      <RegisterForm onSwitchToLogin={() => setShowRegister(false)} />
+    ) : (
+      <LoginForm onSwitchToRegister={() => setShowRegister(true)} />
+    )
+  }
+
+  return (
+    <div className="app">
+      <Header 
+        showUserManagement={showUserManagement}
+        setShowUserManagement={setShowUserManagement}
+      />
+      <TemperatureMonitor showUserManagement={showUserManagement} />
+    </div>
+  )
+}
+
+function TemperatureMonitor({ showUserManagement }) {
   // State variables - these store data that can change
   const [currentTemp, setCurrentTemp] = useState(22.5)
   const [temperatureHistory, setTemperatureHistory] = useState([])
@@ -54,13 +83,8 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>🌡️ Cold Chain Monitor</h1>
-        <p>Temperature Monitoring System</p>
-      </header>
-
-      <main className="app-main">
+    <main className="app-main">
+      {showUserManagement && <UserManagement />}
         {/* Current Temperature Display */}
         <div className="temperature-card">
           <h2>Current Temperature</h2>
@@ -136,6 +160,13 @@ export default function App() {
           </div>
         </div>
       </main>
-    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   )
 }
